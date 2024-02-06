@@ -38,7 +38,21 @@ router.get('/', async (req, res) => {
                 }
 
                 if (hasInterval) {
-                    //Gérer les intervalles
+                    //
+                    influxQuery += ` GROUP BY time(${interval})`
+                    gpsQuery += ` GROUP BY time(${interval})`
+                    rainQuery += ` GROUP BY time${interval})}`
+                    /*const units = {
+                        's': 1,
+                        'm': 60,
+                        'h': 3600,
+                        'D': 86400,
+                        'M': 2592000,
+                        'Y': 31104000
+                    }
+                    const unit = interval.slice(-1);
+                    const value = parseInt(interval.slice(0,-1))
+                    const seconds = value * units[unit]*/
                 }
 
                 result = await influx.query(influxQuery);
@@ -50,9 +64,7 @@ router.get('/', async (req, res) => {
         }
         else{
             filter.forEach(metrique => {
-                let influxQuery = `SELECT * FROM "${metrique}" `
-
-                influxQuery += ` WHERE time >= ${fromEpoch}`;
+                let influxQuery = `SELECT * FROM "${metrique}" WHERE time >= ${fromEpoch}`;
 
                 if (hasTo) {
                     const toEpoch = Date.parse(to) * 1000000;
