@@ -1,7 +1,0 @@
-sudo docker run -d --name influxdb -p 8086:8086 -e INFLUXDB_DB=meteodb -e INFLUXDB_ADMIN_USER=admin -e INFLUXDB_ADMIN_PASSWORD=admin -v /var/lib/influxdb:/var/lib/influxdb influxdb:1.8
-
-influx -username admin -password admin -database meteodb
-
-show measurements
-
-
