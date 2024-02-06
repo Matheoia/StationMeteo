@@ -1,8 +1,11 @@
 const express = require('express');
+const cors = require('cors');
 const liveRouter = require('./routes/live');
+
 
 const app = express();
 
+app.use(cors());
 
 app.use('/live', liveRouter);
 
