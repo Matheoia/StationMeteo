@@ -2,7 +2,7 @@
 
 -> Create Sensors RainCounter.log gpsNmea
 ```shell
-git clone fakesonde
+git clone https://gitlab.com/cedricici/fakesonde
 cd fakesonde
 npm install 
 node server.js

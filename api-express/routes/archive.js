@@ -71,8 +71,8 @@ router.get('/', async (req, res) => {
         const tab_hum = measurements.indexOf('humidity') !== -1 ? result[measurements.indexOf('humidity')].map(hum => hum.humidity_value) : [];
         const tab_wspeed = measurements.indexOf('wind_speed_avg') !== -1 ? result[measurements.indexOf('wind_speed_avg')].map(wind => wind.wind_speed_avg_value) : [];
         const tab_wdir = measurements.indexOf('wind_heading') !== -1 ? result[measurements.indexOf('wind_heading')].map(wind => wind.wind_heading_value) : [];
-        const tab_rain = measurements.indexOf('rain') !== -1 ? result[measurements.indexOf('rain')].map(rain => rain.rain_value) : [];
-        console.log(resultGPS);
+        const tab_rain = 0.3274 * measurements.indexOf('rain') !== -1 ? resultRain[measurements.indexOf('rain')].map(rain => rain.rain_value) : [];
+        console.log(resultRain);
         const finalJson = {
             name: 'piensg027',
             status: 1,
