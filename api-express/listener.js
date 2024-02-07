@@ -1,6 +1,7 @@
 const { time } = require('console');
 const fs = require('fs');
 const Influx = require('influx');
+const nmea = require("nmea-simple");
 
 const influx = new Influx.InfluxDB({
     host: 'localhost',
@@ -65,9 +66,7 @@ fs.watch(rainCounterFilePath, (eventType, filename) => {
                 console.error(`Erreur lors de la lecture du fichier ${filename} :`, err);
                 return;
             }
-
             try {
-               
                 const timestamp = new Date(data.trim());
                
                 influx.writePoints([
@@ -101,15 +100,14 @@ fs.watch(gpsNmeaFilePath, (eventType, filename) => {
             }
 
             try {
-
-                const splitData = data.split(',');
+                const goodData = nmea.parseNmeaSentence(data.split('\n')[0]);
 
                 influx.writePoints([
                     {
                         measurement: 'gps',
                         fields: {
-                            latitude: splitData[2]/100,
-                            longitude: splitData[4]/100,
+                            latitude: goodData.latitude,
+                            longitude: goodData.longitude,
                             name: 'gps'
                         },
                     }
