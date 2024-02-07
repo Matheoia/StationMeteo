@@ -14,36 +14,25 @@ router.get('/', async (req, res) => {
     try {
         const { from, to = 'now', filter = 'all', interval = '5m' } = req.query;
 
-        // Convert 'from' parameter to epoch
+        // Convertit le paramètre 'from' en epoch ( UTC )
         const fromEpoch = Date.parse(from) * 1000000;
-
-        //Initialise les requêtes
         let influxQuery = '';
         let gpsQuery = '';
         let rainQuery = '';
         let measurements = [];
         let toEpoch = 0;
-        try {
-            if (to == 'now') {
-                toEpoch = Date.now() * 1000000;
-            } else {
-                toEpoch = Date.parse(to) * 1000000;
-            }
-        } catch {
-            console.error('Paramètre "to" non valide', error);
-            res.status(400).json({ error });
+
+        if (to == 'now') {
+            toEpoch = Date.now() * 1000000;
+        } else {
+            toEpoch = Date.parse(to) * 1000000;
         }
 
-        try {
-            if (filter == 'all') {
-                //Créée la liste des mesure que l'on veut
-                measurements = ['temperature', 'rain', 'pressure', 'humidity', 'luminosity', 'wind_heading', 'wind_speed_avg'];
-            } else {
-                measurements = filter.split(',')
-            }
-        } catch {
-            console.error('Paramètres de filtre non valides', error)
-            res.status(400).json({ error });
+        if (filter == 'all') {
+            //Créée la liste des mesure que l'on veut
+            measurements = ['temperature', 'rain', 'pressure', 'humidity', 'luminosity', 'wind_heading', 'wind_speed_avg'];
+        } else {
+            measurements = filter.split(',')
         }
         console.log(measurements)
         await Promise.all(measurements.map(async (measurement) => {
@@ -70,35 +59,19 @@ router.get('/', async (req, res) => {
             rainQuery += ";"
             console.log(influxQuery)
         }));
-
-
         const result = await influx.query(influxQuery);
         const resultGPS = await influx.query(gpsQuery);
         const resultRain = await influx.query(rainQuery);
         console.log(result)
         console.log(measurements.indexOf('temperature'))
-        let tab_temp,tab_press,tab_rain,tab_wspeed,tab_wdir,tab_lum,tab_hum = [];
-        if(measurements.indexOf('pressure') != -1){
-            tab_press = result[measurements.indexOf('pressure')].map(press => press.pressure_value)
-        }
-        if(measurements.indexOf('temperature') != -1){
-            tab_temp = result[measurements.indexOf('temperature')].map(temp => temp.temperature_value)
-        }
-        if(measurements.indexOf('luminosity') != -1){
-            tab_lum = result[measurements.indexOf('luminosity')].map(light => light.luminosity_value)
-        }
-        if(measurements.indexOf('humidity') != -1){
-            tab_hum = result[measurements.indexOf('humidity')].map(hum => hum.humidity_value)
-        }
-        if(measurements.indexOf('wind_heading') != -1){
-            tab_wspeed = result[measurements.indexOf('wind_heading')].map(wind => wind.wind_speed_avg_value)
-        }
-        if(measurements.indexOf('wind_heading') != -1){
-            tab_wdir = result[measurements.indexOf('wind_heading')].map(wind => wind.wind_heading_value)
-        }
-        if(measurements.indexOf('wind_speed_avg') != 1){
-            tab_wspeed = result[measurements.indexOf('wind_speed_avg')].map(wind => wind.wind_speed_avg_value);
-        }
+
+        const tab_press = measurements.indexOf('pressure') !== -1 ? result[measurements.indexOf('pressure')].map(press => press.pressure_value) : [];
+        const tab_temp = measurements.indexOf('temperature') !== -1 ? result[measurements.indexOf('temperature')].map(temp => temp.temperature_value) : [];
+        const tab_lum = measurements.indexOf('luminosity') !== -1 ? result[measurements.indexOf('luminosity')].map(light => light.luminosity_value) : [];
+        const tab_hum = measurements.indexOf('humidity') !== -1 ? result[measurements.indexOf('humidity')].map(hum => hum.humidity_value) : [];
+        const tab_wspeed = measurements.indexOf('wind_speed_avg') !== -1 ? result[measurements.indexOf('wind_speed_avg')].map(wind => wind.wind_speed_avg_value) : [];
+        const tab_wdir = measurements.indexOf('wind_heading') !== -1 ? result[measurements.indexOf('wind_heading')].map(wind => wind.wind_heading_value) : [];
+        const tab_rain = measurements.indexOf('rain') !== -1 ? result[measurements.indexOf('rain')].map(rain => rain.rain_value) : [];
         console.log(resultGPS);
         const finalJson = {
             name: 'piensg027',
@@ -117,35 +90,10 @@ router.get('/', async (req, res) => {
                     direction: tab_wdir,
                 },
                 light: tab_lum,
-                humidity: tab_hum , 
+                humidity: tab_hum,
             }
         }
-        /*const reformattedData = {
-            name: 'piensg027',
-            status: 1,
-            location: {
-                date: Date(),
-                coords: result.map(item => [item.gps_latitude, item.gps_longitude]),
-            },
-            measurements: {
-                /*date: item.map(subitem => subitem.time),
-                pressure: Array.from(item, subitem =>
-                    subitem.pressure_value
-                ),
-                temperature: result[measurements.indexOf('temperature')].map(temp => temp.temperature_value),
-                rain: item.rain_amount,
-                wind: {
-                    speed: item.wind_speed_avg_value,
-                    direction: item.wind_heading_value,
-                },
-                light: item[5].luminosity_value,
-                humidity: item[4].humidity_value,
-            },
-        };*/
         res.json(finalJson);
-        //res.json(result);
-
-
     } catch (error) {
         console.error('Erreur lors de la récupération des données d\'archive :', error);
         res.status(500).json({ error });

@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/:measure', async (req, res) => {
+router.get('/measure/:measure', async (req, res) => {
     try {
         const { measure } = req.params;
 
@@ -69,6 +69,31 @@ router.get('/:measure', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de la récupération de la colonne spécifiée' });
     }
 });
+
+
+router.get('/wind', async (req, res) => {
+    try {
+        const measurements = ['wind_heading', 'wind_speed_avg', 'wind_speed_max', 'wind_speed_min'];
+        const lastValues = {};
+
+        await Promise.all(measurements.map(async (measurement) => {
+            const result = await influx.query(`SELECT * FROM "${measurement}" ORDER BY time DESC LIMIT 1`);
+
+            if (result.length > 0) {
+                lastValues[measurement] = {
+                    value: result[0].value,
+                    time: result[0].time,
+                };
+            }
+        }));
+        res.json(lastValues);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des dernières valeurs :', error);
+        res.status(500).json({ error: 'Erreur lors de la récupération des dernières valeurs' });
+    }
+});
+
+
 
 
 module.exports = router;
