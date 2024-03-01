@@ -3,6 +3,7 @@ const Influx = require('influx');
 
 const router = express.Router();
 
+//Logins de la DB Influx
 const influx = new Influx.InfluxDB({
     host: 'localhost',
     database: 'meteodb',
@@ -16,18 +17,44 @@ router.get('/', async (req, res) => {
 
         // Convertit le paramètre 'from' en epoch ( UTC )
         const fromEpoch = Date.parse(from) * 1000000;
+        //Initialisation des paramètres
         let influxQuery = '';
         let gpsQuery = '';
         let rainQuery = '';
         let measurements = [];
         let toEpoch = 0;
 
+        //Gestion du cas from == to
         if (to == 'now') {
             toEpoch = Date.now() * 1000000;
         } else {
             toEpoch = Date.parse(to) * 1000000;
+            console.log(to, toEpoch);
+        } if (toEpoch == fromEpoch && toEpoch % 86400000000000 == 0) {
+            toEpoch += 86399000000000;
         }
+        //Ajustement de l'intervalle minimum en fonction de la plage de données voulue
+        switch (interval[-1]) {
+            case 'h':
+                if (toEpoch - fromEpoch >= 86400000000000 * 365) {
+                    interval = '1j';
+                }
+            case 'm':
+                if (toEpoch - fromEpoch >= 86400000000000 * 31) {
+                    interval = '1h';
+                } if (toEpoch - fromEpoch >= 86400000000000 * 365) {
+                    interval = '1j'
+                }
+            case 's':
+                if (toEpoch - fromEpoch >= 86400000000000) {
+                    interval = '1m';
+                } if (toEpoch - fromEpoch >= 86400000000000 * 31) {
+                    interval = '1h';
+                } if (toEpoch - fromEpoch >= 86400000000000 * 365) {
+                    interval = '1j';
+                }
 
+        }
         if (filter == 'all') {
             //Créée la liste des mesure que l'on veut
             measurements = ['temperature', 'rain', 'pressure', 'humidity', 'luminosity', 'wind_heading', 'wind_speed_avg'];
@@ -37,23 +64,21 @@ router.get('/', async (req, res) => {
         console.log(measurements)
         await Promise.all(measurements.map(async (measurement) => {
 
+            //On séléctionne les données plus récentes que from
             influxQuery += `SELECT MEAN(*) AS ${measurement} FROM "${measurement}" WHERE time >= ${fromEpoch}`;
             gpsQuery += `SELECT MEAN(*) AS gps FROM "gps" WHERE time >= ${fromEpoch}`;
-            rainQuery += `SELECT MEAN(*) AS rain FROM "rain" WHERE time >= ${fromEpoch}`;
+            rainQuery += `SELECT COUNT(*) AS rain FROM "rain" WHERE time >= ${fromEpoch}`;
 
-            console.log("requetes initialisées");
-
+            //Celles plus anciennes que to    
             influxQuery += ` AND time <= ${toEpoch}`;
             gpsQuery += ` AND time <= ${toEpoch}`;
             rainQuery += ` AND time <= ${toEpoch}`;
 
-            console.log("argument to géré");
-
+            //Échantillonnées en fonction de l'intervalle
             influxQuery += ` GROUP BY time(${interval})`;
             gpsQuery += ` GROUP BY time(${interval})`;
             rainQuery += ` GROUP BY time(${interval})`;
 
-            console.log("argument interval géré");
             influxQuery += ";"
             gpsQuery += ";"
             rainQuery += ";"
@@ -65,13 +90,13 @@ router.get('/', async (req, res) => {
         console.log(result)
         console.log(measurements.indexOf('temperature'))
 
+        //Parsing des résultats SQL et construction du JSON
         const tab_press = measurements.indexOf('pressure') !== -1 ? result[measurements.indexOf('pressure')].map(press => press.pressure_value) : [];
         const tab_temp = measurements.indexOf('temperature') !== -1 ? result[measurements.indexOf('temperature')].map(temp => temp.temperature_value) : [];
         const tab_lum = measurements.indexOf('luminosity') !== -1 ? result[measurements.indexOf('luminosity')].map(light => light.luminosity_value) : [];
         const tab_hum = measurements.indexOf('humidity') !== -1 ? result[measurements.indexOf('humidity')].map(hum => hum.humidity_value) : [];
         const tab_wspeed = measurements.indexOf('wind_speed_avg') !== -1 ? result[measurements.indexOf('wind_speed_avg')].map(wind => wind.wind_speed_avg_value) : [];
         const tab_wdir = measurements.indexOf('wind_heading') !== -1 ? result[measurements.indexOf('wind_heading')].map(wind => wind.wind_heading_value) : [];
-        const tab_rain = 0.3274 * measurements.indexOf('rain') !== -1 ? resultRain[measurements.indexOf('rain')].map(rain => rain.rain_value) : [];
         console.log(resultRain);
         const finalJson = {
             name: 'piensg027',
@@ -84,7 +109,7 @@ router.get('/', async (req, res) => {
                 date: result[0].map(obj => obj.time),
                 pressure: tab_press,
                 temperature: tab_temp,
-                rain: tab_rain,
+                rain: resultRain[0].map(obj => 0.3274 * obj.rain_amount),
                 wind: {
                     speed: tab_wspeed,
                     direction: tab_wdir,
