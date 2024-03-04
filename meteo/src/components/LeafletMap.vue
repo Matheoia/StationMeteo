@@ -1,3 +1,7 @@
+<!-- 
+  Composant qui contient la carte Leaflet. Définition des urls directement accpetées et markers aux positions des sondes.
+ -->
+
 <template>
   <div ref="mapContainer" class="leaflet-map"></div>
 </template>
