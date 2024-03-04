@@ -1,3 +1,8 @@
+<!-- 
+    La barre de navigation entre les pages. 
+ -->
+
+
 <template>
     <nav class="navbar">
         <router-link to="/" class="link">Accueil</router-link>
