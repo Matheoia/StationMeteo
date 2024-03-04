@@ -1,3 +1,5 @@
+// Gère simplement les trois grandes routes de l'application : accueil, la map et les détails d'une sonde.
+
 import { createRouter, createWebHistory } from 'vue-router'
 
 import MapView from '../views/MapView.vue'
