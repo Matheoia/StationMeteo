@@ -13,7 +13,7 @@ const influx = new Influx.InfluxDB({
 
 router.get('/', async (req, res) => {
     try {
-        const { from, to = 'now', filter = 'all', interval = '5m' } = req.query;
+        let { from, to = 'now', filter = 'all', interval = '5m' } = req.query;
 
         // Convertit le paramètre 'from' en epoch ( UTC )
         const fromEpoch = Date.parse(from) * 1000000;
@@ -34,24 +34,24 @@ router.get('/', async (req, res) => {
             toEpoch += 86399000000000;
         }
         //Ajustement de l'intervalle minimum en fonction de la plage de données voulue
-        switch (interval[-1]) {
+        switch (interval.slice(-1)) {
             case 'h':
-                if (toEpoch - fromEpoch >= 86400000000000 * 365) {
-                    interval = '1j';
+                if (toEpoch - fromEpoch >= 86400000000000 * 7) {
+                    interval = '1d';
                 }
             case 'm':
-                if (toEpoch - fromEpoch >= 86400000000000 * 31) {
+                if (toEpoch - fromEpoch >= 86400000000000) {
                     interval = '1h';
-                } if (toEpoch - fromEpoch >= 86400000000000 * 365) {
-                    interval = '1j'
+                } if (toEpoch - fromEpoch >= 86400000000000 * 7) {
+                    interval = '1d'
                 }
             case 's':
-                if (toEpoch - fromEpoch >= 86400000000000) {
+                if (toEpoch - fromEpoch >= 86400000000000 / 24) {
                     interval = '1m';
-                } if (toEpoch - fromEpoch >= 86400000000000 * 31) {
+                } if (toEpoch - fromEpoch >= 86400000000000) {
                     interval = '1h';
-                } if (toEpoch - fromEpoch >= 86400000000000 * 365) {
-                    interval = '1j';
+                } if (toEpoch - fromEpoch >= 86400000000000 * 7) {
+                    interval = '1d';
                 }
 
         }
