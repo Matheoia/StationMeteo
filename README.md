@@ -50,3 +50,5 @@ npm install
 npx vite
 ```
 -> localhost:5173
+
+Les commentaires sont seulement sur ce git
