@@ -1,3 +1,8 @@
+<!-- 
+    Vue de la carte qui contient simplement le composant LeafletMap et le stylise
+ -->
+
+
 <template>
   <div>
     <LeafletMap id="MapAlone" />
