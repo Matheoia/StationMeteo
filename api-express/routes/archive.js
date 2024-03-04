@@ -15,6 +15,10 @@ router.get('/', async (req, res) => {
     try {
         let { from, to = 'now', filter = 'all', interval = '1d' } = req.query;
 
+	if(interval.slice(-1) != 's' && interval.slice(-1) != 'm' && interval.slice(-1) != 'h' && interval.slice(-1) != 'd'){
+		interval = '1d';
+	}
+
         // Convertit le paramètre 'from' en epoch ( UTC )
         const fromEpoch = Date.parse(from) * 1000000;
         //Initialisation des paramètres
