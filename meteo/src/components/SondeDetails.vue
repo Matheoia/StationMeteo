@@ -1,3 +1,7 @@
+<!-- 
+    Pour afficher les paramètres avec les bonnes unités.
+ -->
+
 <template>
     <div class="dashboard">
         <table>
