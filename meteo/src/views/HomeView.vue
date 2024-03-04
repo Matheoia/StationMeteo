@@ -1,7 +1,13 @@
+<!-- 
+    Vue de la page d'accueil qui contient les cartes des différentes sondes placées aux quatre
+    coins du monde
+ -->
+
 <template>
     <div id="aaa">
         <div class="container">
             <div v-for="(location, index) in locations" :key="index" class="card">
+                <!-- Pour chaque location : une image + les infos -->
                 <a :href="'sondes/' + location.description">
                     <img :src="location.image" alt="Location Image">
                     <div class="card-content">
