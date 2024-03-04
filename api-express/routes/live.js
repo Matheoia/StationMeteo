@@ -12,28 +12,69 @@ const influx = new Influx.InfluxDB({
 
 router.get('/', async (req, res) => {
     try {
-        const measurements = ['pressure', 'temperature', 'humidity', 'luminosity', 'wind_heading', 'wind_speed_avg', 'wind_speed_max', 'wind_speed_min'];
-        const lastValues = {};
+        const measurements = ['temperature', 'pressure', 'humidity', 'luminosity', 'wind_heading', 'wind_speed_avg', 'wind_speed_max', 'wind_speed_min'];
+        const lastValues = {
+            name: "piensg027", 
+            location: {
+                date: new Date().toISOString(), 
+                coords: null
+            },
+            status: true,
+            measurements: {
+                date: new Date().toISOString(), 
+                rain: null, 
+                light: null, 
+                temperature: null,
+                humidity: null, 
+                pressure: null, 
+                wind: {
+                    speed: null, 
+                    direction: null 
+                }
+            }
+        };
 
         await Promise.all(measurements.map(async (measurement) => {
             const result = await influx.query(`SELECT * FROM "${measurement}" ORDER BY time DESC LIMIT 1`);
 
             if (result.length > 0) {
-                lastValues[measurement] = {
-                    value: result[0].value,
-                    time: result[0].time,
-                };
+                switch (measurement) {
+                    case 'temperature':
+                        lastValues.measurements.temperature = result[0].value;
+                        break;
+                    case 'pressure':
+                        lastValues.measurements.pressure = result[0].value;
+                        break;
+                    case 'humidity':
+                        lastValues.measurements.humidity = result[0].value;
+                        break;
+                    case 'luminosity':
+                        lastValues.measurements.light = result[0].value;
+                        break;
+                    case 'wind_heading':
+                        lastValues.measurements.wind.direction = result[0].value;
+                        break;
+                    case 'wind_speed_avg':
+                        lastValues.measurements.wind.speed = result[0].value;
+                        break;
+                    case 'wind_speed_max':
+                        lastValues.measurements.wind.speed = result[0].value;
+                        break;
+                    case 'wind_speed_min':
+                        lastValues.measurements.wind.speed = result[0].value;
+                        break;
+                    default:
+                        break;
+                }
             }
         }));
 
+        // Récupération des dernières valeurs GPS et pluie
         const resultGPS = await influx.query(`SELECT * FROM "gps" ORDER BY time DESC LIMIT 1`);
-        const resultRain = await influx.query(`SELECT * FROM "rain" ORDER BY time DESC LIMIT 1`);        
+        const resultRain = await influx.query(`SELECT * FROM "rain" ORDER BY time DESC LIMIT 1`);
 
-        lastValues['gps'] = {
-            latitude: resultGPS[0].latitude,
-            longitude: resultGPS[0].longitude
-        };
-        lastValues['rain'] = resultRain[0].time;
+        lastValues.measurements.rain = resultRain[0].time;
+        lastValues.location.coords = [resultGPS[0].latitude, resultGPS[0].longitude];
 
         res.json(lastValues);
     } catch (error) {
@@ -70,7 +111,6 @@ router.get('/measure/:measure', async (req, res) => {
     }
 });
 
-
 router.get('/wind', async (req, res) => {
     try {
         const measurements = ['wind_heading', 'wind_speed_avg', 'wind_speed_max', 'wind_speed_min'];
@@ -92,8 +132,5 @@ router.get('/wind', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de la récupération des dernières valeurs' });
     }
 });
-
-
-
 
 module.exports = router;
