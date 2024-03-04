@@ -28,4 +28,25 @@ node app.js
 -> Centrale :5173
 npm run dev
 
+## Résultat
+
 [demo.webm](https://github.com/Matheoia/StationMeteo/assets/121936719/702409d0-eb91-4b5e-8990-dc196d1c74a3)
+
+## Déploiement
+
+sans copier le dashboard en local, mais sans les images
+```shell
+ssh pi@piensg027
+cd ~/StationMeteo/meteo
+serve -s dist
+```
+-> piensg027:3000
+
+sinon : 
+```shell
+git clone 
+cd meteo
+npm install
+npx vite
+```
+-> localhost:5173
