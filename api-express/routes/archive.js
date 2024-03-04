@@ -38,21 +38,21 @@ router.get('/', async (req, res) => {
         //Ajustement de l'intervalle minimum en fonction de la plage de données voulue
         switch (interval.slice(-1)) {
             case 'h':
-		console.log('h');
                 if (toEpoch - fromEpoch >= 86400000000000 * 7) {
                     interval = '1d';
                 }
+		break;
             case 'm':
-		console.log('m');
                 if (toEpoch - fromEpoch >= 86400000000000) {
 		    interval = '1h';
                 }
 		if (toEpoch - fromEpoch >= 86400000000000 * 7) {
                     interval = '1d'
                 }
+		break;
             case 's':
                 if (toEpoch - fromEpoch >= 86400000000000 / 24) {
-                    interval = '1m';
+                    interval = '5m';
                 }
 		if (toEpoch - fromEpoch >= 86400000000000) {
                     interval = '1h';
@@ -60,7 +60,7 @@ router.get('/', async (req, res) => {
 		if (toEpoch - fromEpoch >= 86400000000000 * 7) {
                     interval = '1d';
                 }
-
+	        break;
         }
 
 	console.log(interval);
