@@ -28,10 +28,6 @@
                 <option value="1h" :disabled="disableHour">1 Heure</option>
                 <option value="1d">1 Jour</option>
                 <option value="7d">1 Semaine</option>
-                <option value="1M">1 Mois</option>
-                <option value="3M">3 Mois</option>
-                <option value="6M">6 Mois</option>
-                <option value="1Y">1 An</option>
             </select>
         </div>
         <div>
