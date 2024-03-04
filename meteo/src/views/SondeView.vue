@@ -1,3 +1,10 @@
+<!-- 
+    Vue d'une sonde en particulier. En termes de composants, on retrouve le form pour le selectedParameter : température, pression etc...
+    Les détails qui afficheront soit le 'dashboard' pour tous les paramètres soit les précisions complètes d'une mesure en particulier.
+    Puis, le composant LeafletMap.
+ -->
+
+
 <template>
   <div id="aaa">
     <h1>{{ locationName }}</h1>
@@ -82,6 +89,7 @@ export default {
   },
   async created() {
     try {
+      // Au lancement de la page, le selectedParameter est All. Il faut donc un premier fetch pour afficher toutes les données live. 
       const response = await fetch('http://' + this.id + '/live');
       const data = await response.json();
       this.sensorData.temperature = data.measurements.temperature;
