@@ -51,4 +51,4 @@ npx vite
 ```
 -> localhost:5173
 
-Les commentaires sont seulement sur ce git.
+Les commentaires de la partie dashboard sont seulement sur ce git.
