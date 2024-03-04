@@ -27,3 +27,5 @@ node app.js
 
 -> Centrale :5173
 npm run dev
+
+[demo.webm](https://github.com/Matheoia/StationMeteo/assets/121936719/702409d0-eb91-4b5e-8990-dc196d1c74a3)
