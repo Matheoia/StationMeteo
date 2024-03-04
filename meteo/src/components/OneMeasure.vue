@@ -1,3 +1,13 @@
+<!-- 
+    Représente les détails d'une sonde. Contient le graphique, les deux dates, l'intervalle et le bouton pour lancer fetchArchive qui va 
+    chercher les informations en fonction des trois paramètres au dessus et les envoie à drawChart qui redessine par dessus avec ces
+    nouvelles données.
+
+    disableFive et disableHour permettent de désactiver l'option si la différence entre le début et la fin est trop grande.
+    Cette différence de jours est calculée via une fonction, et est appelée si on change une date.
+ -->
+
+
 <template>
     <div class="measurement">
         <p>Actuellement : {{ measurement }} {{ getUnit(selectedParameter) }}</p>
@@ -149,6 +159,7 @@ export default {
 
 
         async fetchData() {
+            // fetch les données live
             try {
                 const response = await fetch(`http://${this.id}/live`);
                 const data = await response.json();
@@ -167,6 +178,9 @@ export default {
 
         async fetchArchive() {
 
+            // fetch les données archive
+
+            // si requête trop longue, on arrête
             const controller = new AbortController();
             const signal = controller.signal;
 
